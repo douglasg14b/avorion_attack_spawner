@@ -15,7 +15,7 @@ Copy the files into the folders as they are listed in the repository. You may ne
 ## Usage
 `/spawnpirates {difficulty}`
 
-Difficulty ranges from 1-11. So if you wanted to span a wave with a difficulty of 5, you would type in `/spawnpirates 5`
+Difficulty ranges from 1-11. So if you wanted to spawn a wave with a difficulty of 5, you would type in `/spawnpirates 5`
 
 ### Planned
 
