@@ -1,4 +1,5 @@
 -- Copyright 2017 Douglas Gaskell Apache License 2.0
+-- v1.0
 
 function execute(sender, commandName, attackers)
    	Player(sender):addScriptOnce("cmd/spawnpirates.lua", attackers)
