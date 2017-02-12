@@ -2,6 +2,11 @@
 ### v1.0
 
 Allows you to spawn waves of pirates (aliens coming soon) of various difficulties. 
+## Installation
+
+Copy the files into the folders as they are listed in the repository. You may need to create the `cmd` folder under your `player` directory. You can find these directories under your `Avorion` installation folder, under `Avorion/data`
+- `scripts/commands/spawnpirates.lua`
+- `scripts/player/cmd/spawnpirates.lua`
 
 ## Usage
 `/spawnpirates {difficulty}`
