@@ -42,22 +42,27 @@ function setInputValues(difficulty, scale, count)
     local x, y = Sector():getCoordinates()
 
     --Set difficulty
-    if(tonumber(difficulty)) then
-        difficulty = math.min(math.max(difficulty, 100), 1) -- Ceiling: 100 floor: 1
+    if tonumber(difficulty) then
+        if tonumber(difficulty) == 0 then
+            difficulty = Balancing_GetPirateLevel(x, y) --Default: Game default
+        else
+            difficulty = math.max(math.min(difficulty, 100), 1) -- Ceiling: 100 floor: 1
+        end
+        
     else
         difficulty = Balancing_GetPirateLevel(x, y) --Default: Game default
     end
 
     --Set scale
-    if(tonumber(scale)) then
-        scale = math.min(math.max(scale, 100), 0.1) -- Ceiling: 100 floor: 0.1
+    if tonumber(scale) then
+        scale = math.max(math.min(scale, 100), 1) -- Ceiling: 100 floor: 1
     else
         scale = 1
     end
 
     --Set count
-    if(tonumber(count)) then
-        count = math.min(math.max(count, 25), 1) -- Ceiling: 25 floor: 1
+    if tonumber(count) then
+        count = math.max(math.min(count, 25), 1) -- Ceiling: 25 floor: 1
     else
         count = 1
     end    
@@ -67,6 +72,7 @@ function setInputValues(difficulty, scale, count)
     PirateGenerator.volumeScale = scale
     PirateGenerator.shipVolume = Balancing_GetSectorShipVolume(x, y) * scale
     PirateGenerator.shipCount = count
+    print(count)
 end
 
 --Algorithim for creating the wave
@@ -77,12 +83,12 @@ function createShips(dir, up, right, pos)
     local firstPirate
     --Spawn initial, largest ship
     if remainingShips >= 3 then
-        firstPirate = PirateGenerator.createTest(MatrixLookUpPosition(-dir, up, pos), remainingVolume/3)
+        firstPirate = PirateGenerator.create(MatrixLookUpPosition(-dir, up, pos), remainingVolume/3)
 
         remainingVolume = remainingVolume - (remainingVolume/3)
         remainingShips = remainingShips - 1
     elseif remainingShips == 2 then
-        firstPirate = PirateGenerator.createTest(MatrixLookUpPosition(-dir, up, pos), remainingVolume/2)
+        firstPirate = PirateGenerator.create(MatrixLookUpPosition(-dir, up, pos), remainingVolume/2)
 
         remainingVolume = remainingVolume - (remainingVolume/2)
         remainingShips = 1
