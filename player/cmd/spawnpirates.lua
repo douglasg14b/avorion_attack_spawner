@@ -1,5 +1,5 @@
 -- Copyright 2017 Douglas Gaskell Apache License 2.0
--- v1.0
+-- v1.2
 
 if onServer() then
 package.path = package.path .. ";data/scripts/lib/?.lua"
@@ -13,242 +13,156 @@ local UpgradeGenerator = require ("upgradegenerator")
 local TurretGenerator = require ("turretgenerator")
 local PirateGenerator = {}
 
-
-function initialize(difficulty)
-    local difficulty = tonumber(difficulty)
-    local message = "Invalid arguments provided"
-    local valid = true;
+local shipValues = {}
 
 
-    -- create attacking ships
+
+function initialize(difficulty, scale, count)
+
+    setInputValues(difficulty, scale, count)
+
+    local x, y = Sector():getCoordinates()
+
+    -- create location data for ships
     local dir = normalize(vec3(getFloat(-1, 1), getFloat(-1, 1), getFloat(-1, 1)))
     local up = vec3(0, 1, 0)
     local right = normalize(cross(dir, up))
     local pos = dir * 1000
 
-     if difficulty == 1 then
-        message = "Pirate attack difficulty 1 initiated"
+    createShips(dir, up, right, pos)
 
-        local pirate = PirateGenerator.createBandit(MatrixLookUpPosition(-dir, up, pos))
-
-        local distance = pirate:getBoundingSphere().radius * 2 + 20
-        PirateGenerator.createOutlaw(MatrixLookUpPosition(-dir, up, pos + right * distance))
-        PirateGenerator.createOutlaw(MatrixLookUpPosition(-dir, up, pos + right * -distance))
-
-
-    elseif difficulty == 2 then
-        message = "Pirate attack difficulty 2 initiated"
-
-        local pirate = PirateGenerator.createPirate(MatrixLookUpPosition(-dir, up, pos))
-
-        local distance = pirate:getBoundingSphere().radius * 2 + 20
-        PirateGenerator.createBandit(MatrixLookUpPosition(-dir, up, pos + right * distance))
-        PirateGenerator.createBandit(MatrixLookUpPosition(-dir, up, pos + right * -distance))
-
-    elseif difficulty == 3 then
-        message = "Pirate attack difficulty 3 initiated"
-
-        local pirate = PirateGenerator.createMarauder(MatrixLookUpPosition(-dir, up, pos))
-
-        local distance = pirate:getBoundingSphere().radius * 2 + 20
-
-        PirateGenerator.createPirate(MatrixLookUpPosition(-dir, up, pos + right * distance))
-        PirateGenerator.createPirate(MatrixLookUpPosition(-dir, up, pos + right * -distance))
-
-    elseif difficulty == 4 then
-        message = "Pirate attack difficulty 4 initiated"
-
-        local pirate = PirateGenerator.createRaider(MatrixLookUpPosition(-dir, up, pos))
-
-        local distance = pirate:getBoundingSphere().radius * 2 + 20
-
-        PirateGenerator.createMarauder(MatrixLookUpPosition(-dir, up, pos + right * distance))
-        PirateGenerator.createMarauder(MatrixLookUpPosition(-dir, up, pos + right * -distance))
-        PirateGenerator.createPirate(MatrixLookUpPosition(-dir, up, pos + right * -distance * 2.0))
-        PirateGenerator.createBandit(MatrixLookUpPosition(-dir, up, pos + right * distance * 2.0))
-
-    elseif difficulty == 5 then
-        message = "Pirate attack difficulty 5 initiated"
-
-        local pirate = PirateGenerator.createRaider(MatrixLookUpPosition(-dir, up, pos))
-
-        local distance = pirate:getBoundingSphere().radius * 2 + 20
-
-        PirateGenerator.createMarauder(MatrixLookUpPosition(-dir, up, pos + right * distance))
-        PirateGenerator.createRaider(MatrixLookUpPosition(-dir, up, pos + right * -distance))
-        PirateGenerator.createPirate(MatrixLookUpPosition(-dir, up, pos + right * -distance * 2.0))
-        PirateGenerator.createPirate(MatrixLookUpPosition(-dir, up, pos + right * distance * 2.0))
-        PirateGenerator.createBandit(MatrixLookUpPosition(-dir, up, pos + right * distance * 3.0))
-
-    elseif difficulty == 6 then
-        message = "Pirate attack difficulty 6 initiated"
-
-        local pirate = PirateGenerator.createBattleship(MatrixLookUpPosition(-dir, up, pos))
-
-        local distance = pirate:getBoundingSphere().radius * 2 + 20
-
-        PirateGenerator.createRaider(MatrixLookUpPosition(-dir, up, pos + right * distance))
-        PirateGenerator.createRaider(MatrixLookUpPosition(-dir, up, pos + right * -distance))
-        PirateGenerator.createMarauder(MatrixLookUpPosition(-dir, up, pos + right * -distance * 2.0))
-        PirateGenerator.createMarauder(MatrixLookUpPosition(-dir, up, pos + right * distance * 2.0))
-        PirateGenerator.createPirate(MatrixLookUpPosition(-dir, up, pos + right * distance * 3.0))
-
-    elseif difficulty == 7 then
-        message = "Pirate attack difficulty 7 initiated"
-
-        local pirate = PirateGenerator.createBattleship(MatrixLookUpPosition(-dir, up, pos))
-
-        local distance = pirate:getBoundingSphere().radius * 2 + 20
-
-        PirateGenerator.createBattleship(MatrixLookUpPosition(-dir, up, pos + right * distance))
-        PirateGenerator.createRaider(MatrixLookUpPosition(-dir, up, pos + right * -distance))
-        PirateGenerator.createMarauder(MatrixLookUpPosition(-dir, up, pos + right * -distance * 2.0))
-        PirateGenerator.createMarauder(MatrixLookUpPosition(-dir, up, pos + right * distance * 2.0))
-        PirateGenerator.createPirate(MatrixLookUpPosition(-dir, up, pos + right * distance * 3.0))        
-
-    elseif difficulty == 8 then
-        message = "Pirate attack difficulty 8 initiated"
-
-        local pirate = PirateGenerator.createMothership(MatrixLookUpPosition(-dir, up, pos))
-
-        local distance = pirate:getBoundingSphere().radius * 2 + 20
-
-        PirateGenerator.createBattleship(MatrixLookUpPosition(-dir, up, pos + right * distance))
-        PirateGenerator.createRaider(MatrixLookUpPosition(-dir, up, pos + right * -distance))
-        PirateGenerator.createMarauder(MatrixLookUpPosition(-dir, up, pos + right * distance * 2.0))
-        PirateGenerator.createPirate(MatrixLookUpPosition(-dir, up, pos + right * distance * 3.0))        
-        PirateGenerator.createPirate(MatrixLookUpPosition(-dir, up, pos + right * -distance * 3.0))
-
-    elseif difficulty == 9 then
-        message = "Pirate attack difficulty 9 initiated"
-
-        local pirate = PirateGenerator.createDreadnought(MatrixLookUpPosition(-dir, up, pos))
-
-        local distance = pirate:getBoundingSphere().radius * 2 + 20
-
-        PirateGenerator.createBattleship(MatrixLookUpPosition(-dir, up, pos + right * distance))
-        PirateGenerator.createRaider(MatrixLookUpPosition(-dir, up, pos + right * -distance))
-        PirateGenerator.createBattleship(MatrixLookUpPosition(-dir, up, pos + right * -distance * 2.0))
-        PirateGenerator.createMarauder(MatrixLookUpPosition(-dir, up, pos + right * distance * 2.0))
-        PirateGenerator.createPirate(MatrixLookUpPosition(-dir, up, pos + right * distance * 3.0))        
-        PirateGenerator.createPirate(MatrixLookUpPosition(-dir, up, pos + right * -distance * 3.0))
-
-    elseif difficulty == 10 then
-        message = "Pirate attack difficulty 10 initiated"
-
-        local pirate = PirateGenerator.createTitan(MatrixLookUpPosition(-dir, up, pos))
-
-        local distance = pirate:getBoundingSphere().radius * 2 + 20
-
-        PirateGenerator.createBattleship(MatrixLookUpPosition(-dir, up, pos + right * distance))
-        PirateGenerator.createRaider(MatrixLookUpPosition(-dir, up, pos + right * -distance))
-        PirateGenerator.createBattleship(MatrixLookUpPosition(-dir, up, pos + right * -distance * 2.0))
-        PirateGenerator.createMarauder(MatrixLookUpPosition(-dir, up, pos + right * distance * 2.0))
-        PirateGenerator.createMarauder(MatrixLookUpPosition(-dir, up, pos + right * distance * 3.0))        
-        PirateGenerator.createPirate(MatrixLookUpPosition(-dir, up, pos + right * -distance * 3.0)) 
-        PirateGenerator.createPirate(MatrixLookUpPosition(-dir, up, pos + right * distance * 4.0))  
-        PirateGenerator.createBandit(MatrixLookUpPosition(-dir, up, pos + right * -distance * 4.0))
-
-    elseif difficulty == 11 then
-        message = "Pirate boss initiated"
-
-        local pirate = PirateGenerator.createBoss(MatrixLookUpPosition(-dir, up, pos))
-        local distance = pirate:getBoundingSphere().radius * 2 + 20
-
-        PirateGenerator.createDreadnought(MatrixLookUpPosition(-dir, up, pos + right * distance))
-        PirateGenerator.createDreadnought(MatrixLookUpPosition(-dir, up, pos + right * -distance))
-    else
-        valid = false
-    end
-
-    Player():sendChatMessage("Server", 0, message)
-    if valid then
-        Sector():broadcastChatMessage("Server"%_t, 2, "Pirates are attacking the sector!"%_t)
-    end
+    
+    Player():sendChatMessage("Server", 0, 'Pirate attack sucessfully initiated'%_t)
+    Sector():broadcastChatMessage("Server"%_t, 2, "Pirates are attacking the sector!"%_t)
     
     terminate()
 end
 
-
-function PirateGenerator.createOutlaw(position, sizeScale, firepowerScale)
-    return PirateGenerator.create(position, 0.75, 0.5, "Outlaw"%_t)
-end
-
-function PirateGenerator.createBandit(position, sizeScale, firepowerScale)
-    return PirateGenerator.create(position, 1.0, 1.0, "Bandit"%_t)
-end
-
-function PirateGenerator.createPirate(position, sizeScale, firepowerScale)
-    return PirateGenerator.create(position, 1.5, 1.0, "Pirate"%_t)
-end
-
-function PirateGenerator.createMarauder(position, sizeScale, firepowerScale)
-    return PirateGenerator.create(position, 2.0, 1.25, "Marauder"%_t)
-end
-
-function PirateGenerator.createRaider(position, sizeScale, firepowerScale)
-    return PirateGenerator.create(position, 4.0, 1.5, "Raider"%_t)
-end
-
-function PirateGenerator.createBattleship(position, sizeScale, firepowerScale)
-    return PirateGenerator.create(position, 8.0, 5, "Pirate Battleship"%_t)
-end
-
-function PirateGenerator.createMothership(position, sizeScale, firepowerScale)
-    return PirateGenerator.create(position, 30.0, 5.0, "Pirate Mothership"%_t)
-end
-
-function PirateGenerator.createDreadnought(position, sizeScale, firepowerScale)
-    return PirateGenerator.create(position, 60.0, 6.0, "Pirate Dreadnought"%_t)
-end
-
-function PirateGenerator.createTitan(position, sizeScale, firepowerScale)
-    return PirateGenerator.create(position, 150.0, 7.0, "Pirate Titan"%_t)
-end
-
-function PirateGenerator.createBoss(position, sizeScale, firepowerScale)
-    local volumeFactor = 300
-    local turretFactor = 4
-    local turretRarity = Rarity(RarityType.Exotic)
-    local title = "Pirate Boss"
-
-    position = position or Matrix()
+function setInputValues(difficulty, scale, count)
     local x, y = Sector():getCoordinates()
-    PirateGenerator.pirateLevel = PirateGenerator.pirateLevel or Balancing_GetPirateLevel(x, y)  
-    local faction = Galaxy():getPirateFaction(PirateGenerator.pirateLevel)
-    local volume = Balancing_GetSectorShipVolume(x, y) * volumeFactor;   
 
-    local probabilities = Balancing_GetMaterialProbability(x, y)
-    local material = Material(getValueFromDistribution(probabilities))
-    local plan = PlanGenerator.makeShipPlan(faction, volume, nil, material)
-    local ship = Sector():createShip(faction, "", plan, position)    
+    --Set difficulty
+    if(tonumber(difficulty)) then
+        difficulty = math.min(math.max(difficulty, 100), 1) -- Ceiling: 100 floor: 1
+    else
+        difficulty = Balancing_GetPirateLevel(x, y) --Default: Game default
+    end
 
-    TurretGenerator.initialize(random():createSeed())
-    local turret = TurretGenerator.generateArmed(x, y, nil, turretRarity)
-    local numTurrets = math.max(2, Balancing_GetEnemySectorTurrets(x, y) * turretFactor)
-    ShipUtility.addTurretsToCraft(ship, turret, numTurrets)
+    --Set scale
+    if(tonumber(scale)) then
+        scale = math.min(math.max(scale, 100), 0.1) -- Ceiling: 100 floor: 0.1
+    else
+        scale = 1
+    end
+
+    --Set count
+    if(tonumber(count)) then
+        count = math.min(math.max(count, 25), 1) -- Ceiling: 25 floor: 1
+    else
+        count = 1
+    end    
+
+    PirateGenerator.pirateLevel = difficulty
+    PirateGenerator.turretCounts = Balancing_GetEnemySectorTurrets(x, y)
+    PirateGenerator.volumeScale = scale
+    PirateGenerator.shipVolume = Balancing_GetSectorShipVolume(x, y) * scale
+    PirateGenerator.shipCount = count
+end
+
+--Algorithim for creating the wave
+function createShips(dir, up, right, pos)
+    print("/n/n/n/n")
+    local remainingVolume = PirateGenerator.shipVolume * PirateGenerator.shipCount
+    local remainingShips = PirateGenerator.shipCount;
+    local firstPirate
+    --Spawn initial, largest ship
+    if remainingShips >= 3 then
+        firstPirate = PirateGenerator.createTest(MatrixLookUpPosition(-dir, up, pos), remainingVolume/3)
+
+        remainingVolume = remainingVolume - (remainingVolume/3)
+        remainingShips = remainingShips - 1
+    elseif remainingShips == 2 then
+        firstPirate = PirateGenerator.createTest(MatrixLookUpPosition(-dir, up, pos), remainingVolume/2)
+
+        remainingVolume = remainingVolume - (remainingVolume/2)
+        remainingShips = 1
+    elseif remainingShips == 1 then
+        firstPirate = PirateGenerator.create(MatrixLookUpPosition(-dir, up, pos), remainingVolume)
+
+        remainingVolume = 0
+        remainingShips = 0
+    else
+        --do something for bad input
+    end
+
+    local distance = firstPirate:getBoundingSphere().radius * 2 + 20
+
+    local shipNum = 0;
+    while(remainingShips > 0) do
+        if remainingShips >= 3 then
+
+            PirateGenerator.create(getSpawnLocation(-dir, up, pos, right, distance, shipNum + 1), remainingVolume/3)
+            PirateGenerator.create(getSpawnLocation(-dir, up, pos, right, distance, shipNum + 2), remainingVolume/3)
+
+            remainingVolume = remainingVolume - (remainingVolume/3*2)
+            remainingShips = remainingShips - 2
+            shipNum = shipNum + 2
+        elseif remainingShips == 2 then
+
+            PirateGenerator.create(getSpawnLocation(-dir, up, pos, right, distance, shipNum + 1), remainingVolume/2)
+            PirateGenerator.create(getSpawnLocation(-dir, up, pos, right, distance, shipNum + 2), remainingVolume/2)
+
+            remainingVolume = 0
+            remainingShips = 0
+            shipNum = shipNum + 2
+        elseif remainingShips == 1 then
+            PirateGenerator.create(getSpawnLocation(-dir, up, pos, right, distance, shipNum + 1), remainingVolume)
+
+            remainingVolume = 0
+            remainingShips = 0   
+            shipNum = shipNum + 1         
+        end
+    end
+end
+
+--Determines the necessary spawning location
+function getSpawnLocation(dir, up, pos, right, distance, shipNum)
+    print(math.ceil(shipNum/2))
+    if shipNum % 2 == 0 then
+        return MatrixLookUpPosition(-dir, up, pos + right * distance  * math.ceil(shipNum/2))
+    else
+        return MatrixLookUpPosition(-dir, up, pos + right * -distance * math.ceil(shipNum/2))
+    end
+end
+
+--Forumla to get the turret factor for the ship based on relative volume
+function determineTurretFactor(shipVolume)
+    local x, y = Sector():getCoordinates()
+    local sectorVolume = Balancing_GetSectorShipVolume(x, y)
+    local modOne = 0.5 * (math.pow(PirateGenerator.shipCount, (1/2)))
+    local modTwo = shipVolume/sectorVolume/(math.sqrt(PirateGenerator.volumeScale) + (1.5 * math.sqrt(PirateGenerator.shipCount)))
+
+    --print ("sectorVolume: " .. sectorVolume)
+    --print ("Ship Volume: " .. shipVolume)
+    --print("turret factor: " .. math.max(math.min(modTwo + modOne, 10), 1))
+    --print ("Mod 1: " .. modOne)
+    --print ("Mod 2: " .. modTwo)
     
-    ship.crew = ship.minCrew
-    ship.title = title
-    ship.shieldDurability = ship.shieldMaxDurability
-
-    ShipAI(ship.index):setAggressive()
-
-    ship:setValue("is_pirate", 1)
-
-    return ship        
+    --Minimum of 1, maximum of 10 
+    return math.max(math.min(modTwo + modOne, 10), 1)
 end
 
 -- Grabbed from pirategenerator.lua
 -- Used to avoid changing native game files as much as possible
-function PirateGenerator.create(position, volumeFactor, turretFactor, title)
+function PirateGenerator.create(position, volume, title)
+    turretFactor = determineTurretFactor(volume)
+    --TEMP Title
+    title ="A Pirate Ship"
+
     position = position or Matrix()
     local x, y = Sector():getCoordinates()
-    PirateGenerator.pirateLevel = PirateGenerator.pirateLevel or Balancing_GetPirateLevel(x, y)
 
     local faction = Galaxy():getPirateFaction(PirateGenerator.pirateLevel)
-
-    local volume = Balancing_GetSectorShipVolume(x, y) * volumeFactor;
 
     local plan = PlanGenerator.makeShipPlan(faction, volume)
     local ship = Sector():createShip(faction, "", plan, position)
@@ -265,11 +179,8 @@ function PirateGenerator.create(position, volumeFactor, turretFactor, title)
     ShipAI(ship.index):setAggressive()
 
     ship:setValue("is_pirate", 1)
-
     return ship    
 end
-
-
 
 -- Grabbed from pirategenerator.lua
 -- Used to avoid changing native game files as much as possible
