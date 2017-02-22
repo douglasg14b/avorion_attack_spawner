@@ -42,3 +42,5 @@ Parameters are constrained to their allowed range. So if you enter a `difficulty
 ### Planned
 
 - Alien Spawning
+- Better parameters parsing. Enabling out of order parameters (ie. --difficulty)
+- Scaling mode that automatically scales based on player ship count, volume, and dps in sector
