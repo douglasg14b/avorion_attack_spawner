@@ -1,5 +1,5 @@
 -- Copyright 2017 Douglas Gaskell Apache License 2.0
--- v1.2
+-- v1.3
 
 if onServer() then
 package.path = package.path .. ";data/scripts/lib/?.lua"
