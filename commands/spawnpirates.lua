@@ -2,6 +2,14 @@
 -- v1.3
 function execute(sender, commandName, ...)
     local args = {...}
+
+    if(#args == 1) then
+        if(args[1] == "--help") then
+            Player(sender):sendChatMessage("SpawnPirates", 0, getHelp())
+            return 0, "", ""
+        end
+    end
+
     local parsedArgs = parseArguments(args)
 
     print("args: " .. parsedArgs["difficulty"] .. ",".. parsedArgs["scale"] .. "," .. parsedArgs["count"])
@@ -21,7 +29,35 @@ function execute(sender, commandName, ...)
         Player(sender):addScriptOnce("cmd/spawnpirates.lua", parsedArgs["difficulty"], parsedArgs["scale"], parsedArgs["count"])
     end
 
+    return 0, "", ""
 end
+--[[
+function execute(sender, commandName, playerName, difficulty, scale, count)
+    if playerName ~= nil then --Attempt to find player
+print(playerName)
+        if playerName == "--me" then -- Spawning on sender
+            Player(sender):addScriptOnce("cmd/spawnpirates.lua", difficulty, scale, count)
+            return 0, "", ""
+        end
+
+        if playerName == "--help" then --Getting help
+            Player(sender):sendChatMessage("SpawnPirates", 0, getHelp())
+            return 0, "", ""
+        end
+
+
+        local player = findPlayer(playerName)
+        if player ~= false then -- Player found, spawn on player
+            player:addScriptOnce("cmd/spawnpirates.lua", difficulty, scale, count)
+        else
+            Player(sender):sendChatMessage("SpawnPirates", 1, "Player '" .. playerName .. "' is not online or does not exist.")
+        end
+    else -- No player provided, spawn on sender
+   	    Player(sender):addScriptOnce("cmd/spawnpirates.lua", difficulty, scale, count)
+    end
+    return 0, "", ""
+end
+]]
 
 function findPlayer(playerName)
     for i, player in pairs({Server():getOnlinePlayers()}) do
@@ -32,6 +68,15 @@ function findPlayer(playerName)
     return false
 end
 
+--Arguments/parameters in the order you wish them to be in
+local validArgs = {
+    "player",
+    "difficulty",
+    "scale",
+    "count"
+}
+
+--Was supposed to do more, can prolly be removed. Left for a clear function name
 function parseArguments(args)
     local parsedArgs = splitArguments(args, "--")
 
@@ -105,8 +150,8 @@ end
 
 function getHelp()
     return "\nSpawns a pirate attack with the provided parameters. Usage: \n" ..
-            "/spawnpirates {player} {difficulty} {scale} {pirateCount} \n" ..
+            "/spawnpirates [--player, --difficulty, --scale, --count]\n" ..
            "Difficulties: [1-100], Scale: [1-100], PirateCount: [1-25]\n" ..
-           "All parameters are optional, using '0' will set the parameters to their defaults\n" ..
-           "To spawn on yourself use '--me' for the player"
+           "All parameters are optional\n" ..
+           "Example: /spawnpirates --difficulty 10 --scale 2 -- count 6 --player george"
 end
