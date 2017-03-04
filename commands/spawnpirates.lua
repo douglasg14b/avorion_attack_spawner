@@ -1,5 +1,5 @@
 -- Copyright 2017 Douglas Gaskell Apache License 2.0
--- v1.3
+-- v1.3.1
 function execute(sender, commandName, ...)
     local args = {...}
 
