@@ -31,33 +31,6 @@ function execute(sender, commandName, ...)
 
     return 0, "", ""
 end
---[[
-function execute(sender, commandName, playerName, difficulty, scale, count)
-    if playerName ~= nil then --Attempt to find player
-print(playerName)
-        if playerName == "--me" then -- Spawning on sender
-            Player(sender):addScriptOnce("cmd/spawnpirates.lua", difficulty, scale, count)
-            return 0, "", ""
-        end
-
-        if playerName == "--help" then --Getting help
-            Player(sender):sendChatMessage("SpawnPirates", 0, getHelp())
-            return 0, "", ""
-        end
-
-
-        local player = findPlayer(playerName)
-        if player ~= false then -- Player found, spawn on player
-            player:addScriptOnce("cmd/spawnpirates.lua", difficulty, scale, count)
-        else
-            Player(sender):sendChatMessage("SpawnPirates", 1, "Player '" .. playerName .. "' is not online or does not exist.")
-        end
-    else -- No player provided, spawn on sender
-   	    Player(sender):addScriptOnce("cmd/spawnpirates.lua", difficulty, scale, count)
-    end
-    return 0, "", ""
-end
-]]
 
 function findPlayer(playerName)
     for i, player in pairs({Server():getOnlinePlayers()}) do
@@ -69,25 +42,47 @@ function findPlayer(playerName)
 end
 
 --Arguments/parameters in the order you wish them to be in
-local validArgs = {
-    "player",
-    "difficulty",
-    "scale",
-    "count"
+local validParams = {
+    {
+        name = "player",
+        hasDefault = false,
+        hasAlius = true,
+        alius = {"p"}
+    },
+    {
+        name = "difficulty",
+        hasDefault = true,
+        hasAlius = true,
+        defaultValue = 0,
+        alius = {"diff", "d"}
+    },
+    {
+        name = "scale",
+        hasDefault = true,
+        hasAlius = true,
+        defaultValue = 0,
+        alius = {"s"}
+    },
+    {
+        name = "count",
+        hasDefault = true,
+        hasAlius = true,
+        defaultValue = 0,
+        alius = {"c"}
+    }
 }
 
---Was supposed to do more, can prolly be removed. Left for a clear function name
+
 function parseArguments(args)
     local parsedArgs = splitArguments(args, "--")
 
-    if(parsedArgs["difficulty"] == nil) then
-        parsedArgs["difficulty"] = 0
-    end
-    if(parsedArgs["scale"] == nil) then
-        parsedArgs["scale"] = 0
-    end
-    if(parsedArgs["count"] == nil) then
-        parsedArgs["count"] = 0
+    --Set default values
+    for index in ipairs(validParams) do
+        if(validParams[index].hasDefault) then
+            if(parsedArgs[validParams[index].name] == nil) then
+                parsedArgs[validParams[index].name] = validParams[index].defaultValue
+            end
+        end
     end
     return parsedArgs
 end
@@ -95,39 +90,48 @@ end
 
 --Splits the arguments into their seperate commands
 function splitArguments(args, delimiter)
-    local concatianted = ""
+    local concatinated = ""
     for index in ipairs(args) do
         if(string.match(args[index], "--")) then
-            concatianted = concatianted .. " " .. args[index]
-            --print(args[index])
+            concatinated = concatinated .. " " .. args[index]
         end
     end
 
-    if concatianted == nil then
-            concatianted = "%s"
+    if concatinated == nil then
+        concatinated = "%s"
     end
     local t={} ; i=1
-    for str in string.gmatch(concatianted, "([^"..delimiter.."]+)") do
+    for str in string.gmatch(concatinated, "([^"..delimiter.."]+)") do
         if i > 1 then --slip first blank match
             local paramName = getArgumentName(str)
             if paramName ~= "invalid" then
                 t[paramName] = getCommandValue(str)
-                print(paramName .. ": {" .. t[paramName] .. "}")
             end
         end
-            i = i + 1  
+        i = i + 1  
     end
     return t
 end
 
---Determines the name via simple match, necessary to know which param is which
+--Matches the argument up to the valid params 
 function getArgumentName(param)
-    if(string.match(param, "--player")) then return "player"
-    elseif(string.match(param, "--difficulty") or string.match(param, "--diff")) then return "difficulty"
-    elseif(string.match(param, "--scale")) then return "scale"
-    elseif(string.match(param, "--count")) then return "count"
-    else return "invalid"
+    local foundValid = false
+    for index in pairs(validParams) do
+        if(validParams[index].hasAlius) then
+            print("has alius")
+            for aIndex in pairs(validParams[index].alius) do
+                if(string.match(param, "--" .. validParams[index].alius[aIndex])) then
+                    return validParams[index].name
+                end                
+            end
+        else
+            if(string.match(param, "--" .. validParams[index].name)) then
+                return validParams[index].name
+            end
+        end
+
     end
+    return "invalid"
 end
 
 --Since there will be a space after the command, find the first space and get the remainder of string from there
